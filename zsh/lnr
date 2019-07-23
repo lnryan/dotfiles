@@ -1,0 +1,58 @@
+export LNR_ZSH=$ZSHRC_DIR/zsh/lnr
+export OSCAR_VAULT="springernature/oscar"
+
+#General CLI Shortcuts
+function find_in_my_zsh_config(){
+  cat $LNR_ZSH | grep $1;
+}
+
+alias hg="history | grep"
+alias cish='cat $LNR_ZSH'
+alias gish='find_in_my_zsh_config'
+alias vish='vi $LNR_ZSH'
+alias sish="source $LNR_ZSH"
+alias zsha='echo "$1" >> $LNR_ZSH'
+alias vsish="vish && sish"
+
+#Cloudfoundry Shortcuts
+alias cft='cf target -s='
+alias cfto="cf target -o="
+
+function cf-login(){
+   
+   API=$(vault read --field=api-$1 $OSCAR_VAULT/cloudfoundry)
+   if [ "$1" = "snpaas" ]; then 
+     USER=$(vault read --field=username-$1 $OSCAR_VAULT/cloudfoundry)
+     PASS=$(vault read --field=password-$1 $OSCAR_VAULT/cloudfoundry)
+   else
+     USER=$(vault read --field=username $OSCAR_VAULT/cloudfoundry)
+     PASS=$(vault read --field=password $OSCAR_VAULT/cloudfoundry)
+   fi
+
+   echo "logging into $1"
+   cf login -a=$API -u=$USER -p=$PASS 
+
+   if [ "$2" != "" ]; then
+     cf target -s=$2
+   fi     
+}
+
+alias cf-snp="cf-login snpaas " 
+
+alias cf-dev="cf-login dev " 
+
+alias cf-live="cf-login live " 
+
+
+#Vault shortcuts
+function fast-vault(){
+  CMD=${4:="read"}
+  OPTS=${3:=""}
+  echo "i have command=$CMD, team=$1, key=$2 , options=$3, "
+  vault $CMD $OPTS springernature/$1/$2
+}
+alias oscar-vault="fast-vault oscar "
+
+echo Your commands are loading, lindsay
+
+
