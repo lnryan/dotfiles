@@ -33,7 +33,19 @@ __git_files () {
     _wanted files expl 'local files' _files
 }
 
+plugins=(
+  tmux
+)
 # Specific environments
 . $ZSHRC_DIR/zsh/springernature
+. $ZSHRC_DIR/zsh/lnr
 
 . $ZSHRC_DIR/zsh/autoenv # must be last as it arses about with cd
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="/home/lindsay/.sdkman"
+[[ -s "/home/lindsay/.sdkman/bin/sdkman-init.sh" ]] && source "/home/lindsay/.sdkman/bin/sdkman-init.sh"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

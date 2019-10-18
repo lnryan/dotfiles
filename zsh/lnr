@@ -1,5 +1,6 @@
 export LNR_ZSH=$ZSHRC_DIR/zsh/lnr
 export OSCAR_VAULT="springernature/oscar"
+export REPOS="$HOME/Dev/repos"
 
 #General CLI Shortcuts
 function find_in_my_zsh_config(){
@@ -24,7 +25,11 @@ function ghc(){
  REPO=$1
 
  DIR=${3:="$HOME/Dev/repos"}
+<<<<<<< HEAD
  if [ "$DIR" = "tools" || "$DIR" = "learning" || "$DIR" = "repos" ]; then
+=======
+ if [ "$DIR" = "tools" || "$DIR" = "learning" || "$DIR" = "repos" ]; then 
+>>>>>>> sync latest tweaks
   DIR="$HOME/Dev/$DIR"
  fi
 
@@ -75,7 +80,11 @@ function cf-login(){
 
    if [ "$2" != "" ]; then
      cf target -s=$2
+<<<<<<< HEAD
    fi
+=======
+   fi     
+>>>>>>> sync latest tweaks
 
 }
 
@@ -96,4 +105,9 @@ function fast-vault(){
 alias oscar-vault="fast-vault oscar "
 
 #CF CPU Wizardry a la jsh
+<<<<<<< HEAD
 export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
+=======
+#export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
+
+>>>>>>> sync latest tweaks
