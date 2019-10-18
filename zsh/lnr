@@ -76,11 +76,7 @@ function cf-login(){
 
    if [ "$2" != "" ]; then
      cf target -s=$2
-<<<<<<< HEAD
-   fi
-=======
    fi     
->>>>>>> sync latest tweaks
 
 }
 
