@@ -96,5 +96,6 @@ function fast-vault(){
 }
 alias oscar-vault="fast-vault oscar "
 
+export TIF=/home/lindsay/Dev/repos/technology-impact-factor-spike
 #CF CPU Wizardry a la jsh
 #export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
