@@ -9,12 +9,13 @@ while [ -h "$SOURCE" ]; do
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 
+echo "SOURCE is $SOURCE"
 ZSHRC_DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
+echo "ZSHRC_DIR is $ZSHRC_DIR"
 
 autoload zmv
 
 export PATH="$HOME/bin:$PATH"
-
 . $ZSHRC_DIR/zsh/brew
 . $ZSHRC_DIR/zsh/nix
 . $ZSHRC_DIR/zsh/editor
@@ -25,6 +26,9 @@ export PATH="$HOME/bin:$PATH"
 . $ZSHRC_DIR/zsh/nvm
 . $ZSHRC_DIR/zsh/python
 . $ZSHRC_DIR/zsh/ruby
+. $HOME/Dev/repos/sn-zsh-extensions/*.zsh
+. $ZSHRC_DIR/zsh/lnr
+
 
 . "$ZSHRC_DIR/zsh/antigen"
 
@@ -37,3 +41,9 @@ __git_files () {
 . $ZSHRC_DIR/zsh/springernature
 
 . $ZSHRC_DIR/zsh/autoenv # must be last as it arses about with cd
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ryan01/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/ryan01/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ryan01/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ryan01/google-cloud-sdk/completion.zsh.inc'; fi

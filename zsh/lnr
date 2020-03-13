@@ -85,15 +85,57 @@ alias cf-dev="cf-login dev "
 
 alias cf-live="cf-login live "
 
+cf-cpu() {
+    local APP_MEMORY="$1"
+    if [[ -z "$APP_MEMORY" ]]; then
+        echo "Usage: cf_cpu <memory in mb>"
+        return 1
+    fi
+
+    local CPU_PERCENT=$(bc <<EOF
+define max(a, b) {
+    if (a > b) {
+        return (a)
+    } else {
+        return (b)
+    }
+}
+
+scale = 2
+
+min_memory = 128.0
+max_memory = 16384.0
+number_of_cpus = 8.0
+max_cpu_shares = 1024.0
+
+cpu_weight = 100.0 * max(min_memory, $APP_MEMORY) / max_memory
+cpu_shares = max_cpu_shares * cpu_weight / 100.0
+cpu_percent = number_of_cpus * 100.0 * cpu_shares / max_cpu_shares
+cpu_percent
+EOF
+)
+    echo "Reserved CPU for ${APP_MEMORY}Mb is ${CPU_PERCENT}%"
+}
+
 
 #Vault shortcuts
 function fast-vault(){
   CMD=${4:="read"}
   OPTS=${3:=""}
-  echo "i have command=$CMD, team=$1, key=$2 , options=$3, "
+#  echo "i have command=$CMD, team=$1, key=$2 , options=$3, "
   vault $CMD $OPTS springernature/$1/$2
 }
 alias oscar-vault="fast-vault oscar "
 
+function kv(){
+  vault read --field="$2" springernature/${3:="oscar"}/$1
+}
+
+function artifuckery(){
+   export ARTIFACTORY_USERNAME=$(vault read --field=username springernature/shared/artifactory)
+   export ARTIFACTORY_PASSWORD=$(vault read --field=password springernature/shared/artifactory)
+}
+
+alias artifuckery-check="echo $ARTIFACTORY_USERNAME $ARTIFACTORY_PASSWORD"
 #CF CPU Wizardry a la jsh
-export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
+#export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
