@@ -17,16 +17,22 @@ set_machine_name() {
 }
 
 install_apps() {
-    local POST_CASK_INSTALLERS="'/opt/homebrew-cask/Caskroom/battle-net/latest/Battle.net-Setup-enUS.app'"
+    local POST_CASK_INSTALLERS="/usr/local/Caskroom/battle-net/latest/Battle.net-Setup.app"
 
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    if ! brew --help >/dev/null 2>&1; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    fi
 
     brew install git 
     brew update
     brew bundle
 
     for INSTALLER in ${POST_CASK_INSTALLERS}; do
-        open $INSTALLER
+        if [[ -d "INSTALLER" ]]; then
+            open $INSTALLER
+        else
+            echo "WARNING: cannot find installer $INSTALLER"
+        fi
     done 
 
     brew cleanup
@@ -45,19 +51,42 @@ link_ssh_keys() {
 }
 
 setup_shell_env() {
-    git clone https://github.com/zsh-users/antigen.git ~/.antigen
-    git clone git@github.com:jshiell/dotfiles.git ~/dotfile
+    if [[ -d "$HOME/dotfiles" ]]; then
+        sed -i '' 's%https://github.com/jshiell/dotfiles.git%git@github.com:jshiell/dotfiles.git%g' "$HOME/dotfiles/.git/config"
+    else
+        git clone git@github.com:jshiell/dotfiles.git "$HOME/dotfiles"
+    fi
 
     "$HOME/dotfiles/link"
 }
 
 setup_git() {
+    mkdir -p "$HOME/.gnupg"
+
+    if [[ "$(uname)" == 'Darwin' ]]; then
+        if ! grep pinentry-program "$HOME/.gnupg/gpg-agent.conf" >/dev/null 2>&1; then
+            if [[ "$(uname -p)" == 'arm' ]]; then
+                echo pinentry-program /opt/homebrew/bin/pinentry-mac >> "$HOME/.gnupg/gpg-agent.conf"
+            else
+                echo pinentry-program /usr/local/bin/pinentry-mac >> "$HOME/.gnupg/gpg-agent.conf"
+            fi
+        fi
+
+        if ! grep use-agent "$HOME/.gnupg/gpg.conf" >/dev/null 2>&1; then
+            echo use-agent >> "$HOME/.gnupg/gpg.conf"
+        fi
+    fi
+
     git config --global user.name 'Jamie Shiell'
     git config --global user.email 'jamie@infernus.org'
     git config --global user.signingkey '1C25BF0EE37BF38E'
 
     git config --global pull.rebase true
     git config --global commit.gpgsign true
+
+    git config --global log.follow true
+
+    git config --global core.commentChar ";"
 
     git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
     git config --global color.diff-highlight.oldNormal    "red bold"
@@ -72,14 +101,14 @@ setup_git() {
     git config --global color.diff.whitespace "red reverse"
 }
 
-setup_pip() {
-    sudo pip install powerline-status glances
-
+setup_powerline_fonts() {
+    [[ -d "$TMPDIR/fonts" ]] && rm -rf "$TMPDIR/fonts"
     git clone https://github.com/powerline/fonts $TMPDIR/fonts
     (
         cd "$TMPDIR/fonts"
         ./install.sh
     )
+    [[ -d "$TMPDIR/fonts" ]] && rm -rf "$TMPDIR/fonts"
 }
 
 tweak_macos() {
@@ -168,7 +197,7 @@ tweak_macos() {
     done
 
     # Disable local TM snapshots
-    sudo tmutil disablelocal
+    sudo tmutil disable
 
     # Don't ask to backup new volumes
     defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -182,7 +211,7 @@ tweak_macos() {
     sudo pmset -a hibernatemode 0
 
     # Remove the sleep image and create a read-only file in its place
-    sudo rm /private/var/vm/sleepimage
+    sudo rm -f /private/var/vm/sleepimage
     sudo touch /private/var/vm/sleepimage
     sudo chflags uchg /private/var/vm/sleepimage
 
@@ -191,24 +220,34 @@ tweak_macos() {
     launchctl unload -w /System/Library/LaunchAgents/com.apple.gamed.plist
 }
 
+install_os_extensions() {
+    if [[ "$(uname -p)" == 'arm' ]]; then
+        sudo softwareupdate --install-rosetta
+    fi
+}
+
 main() {
-    if [[ "$1" == '--help' ]]; then
+    if [[ "${1:-}" == '--help' ]]; then
         echo "Usage: $0 [computer-name]"
         exit 1
     fi
 
-    local MACHINE_NAME="${1:-}"
-
     local BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     cd "$BASE_DIR"
 
-    set_machine_name "$MACHINE_NAME"
+    local MACHINE_NAME="${1:-}"
+    if [[ -n "$MACHINE_NAME" ]]; then
+        set_machine_name "$MACHINE_NAME"
+    else
+        echo "No machine name supplied; no changes will be made to the hostname"
+    fi
 
     link_ssh_keys
     setup_shell_env
     setup_git
+    install_os_extensions
     install_apps
-    setup_pip
+    setup_powerline_fonts
     tweak_macos
 }
 
