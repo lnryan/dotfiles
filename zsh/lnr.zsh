@@ -80,22 +80,3 @@ function cf-login(){
 
 }
 
-alias cf-snp="cf-login snpaas "
-
-alias cf-dev="cf-login dev "
-
-alias cf-live="cf-login live "
-
-
-#Vault shortcuts
-function fast-vault(){
-  CMD=${4:="read"}
-  OPTS=${3:=""}
-  echo "i have command=$CMD, team=$1, key=$2 , options=$3, "
-  vault $CMD $OPTS springernature/$1/$2
-}
-alias oscar-vault="fast-vault oscar "
-
-export TIF=/home/lindsay/Dev/repos/technology-impact-factor-spike
-#CF CPU Wizardry a la jsh
-#export -f cf-cpu cf-cpu-budget cf-cpu-for-app cf-mem-to-megabytes cf-avg-cpu > cf-cpu-budget.sh && cf apps | grep started | awk '{print $1}' | xargs -Ixxx zsh -c 'source cf-cpu-budget.sh; echo -n "xxx: "; cf-cpu-budget xxx' && rm -f cf-cpu-budget.sh
